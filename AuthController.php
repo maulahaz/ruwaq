@@ -15,6 +15,11 @@ class AuthController extends CI_Controller
 		_isLoggedin();
 		$this->_afterSignin();
 	}
+	
+	function testing_git()
+	{
+		echo "Testing Github Edit";
+	}
 
 	public function signup()
 	{
