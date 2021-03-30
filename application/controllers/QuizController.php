@@ -6,6 +6,7 @@ class QuizController extends CI_Controller {
 	{
 		parent ::__construct();
 		$this->load->model('Commons_mdl');
+		$this->title = 'Ruwaq Sibawiyah - Ruwais Arabic Club';
 	}
 
 	function _checkUserPrevilege()
@@ -28,6 +29,7 @@ class QuizController extends CI_Controller {
 		$dtQuiz = $this->Commons_mdl->getData('tbl_quiz', ['type' => 'Essay'], null);
 
 		$data['dtQuiz'] = $dtQuiz;
+		$data['title'] = $this->title;
 		$data['page_title'] = 'Quiz List';
 		$data['isi'] = 'quiz/v_index';
 		$data['jsFile'] = 'quiz/js_quiz';	
@@ -42,7 +44,7 @@ class QuizController extends CI_Controller {
 		$dtQuestions = $this->Commons_mdl->getData('tbl_question', ['type' => 'Essay', 'is_active' => 1], 'id DESC');
 
 		$data['dtQuestions'] = $dtQuestions;
-
+		$data['title'] = $this->title;
 		$data['page_title'] = 'Buat Quiz';
 		$data['isi'] = 'quiz/v_form_quiz';
 		$data['jsFile'] = 'quiz/js_quiz';	
@@ -60,7 +62,7 @@ class QuizController extends CI_Controller {
 
 		$data['dtEdit'] = $dtEdit->row_array();
 		$data['dtQuestions'] = $dtQuestions;
-
+		$data['title'] = $this->title;
 		$data['page_title'] = 'Edit Quiz';
 		$data['isi'] = 'quiz/v_form_quiz';
 		$data['jsFile'] = 'quiz/js_quiz';	
@@ -69,8 +71,8 @@ class QuizController extends CI_Controller {
 
 	function destroy($id)
 	{
-		// _isAdmin();
-		$this->_checkUserPrevilege();
+		_isAdmin();
+		// $this->_checkUserPrevilege();
 
 		$dtQuery = $this->Commons_mdl->getData('tbl_quiz', ['id' => $id], null);
 		if($dtQuery->num_rows() > 0){
@@ -90,6 +92,7 @@ class QuizController extends CI_Controller {
 		$userID = _getUserInfo('ses_UserID');//'user003';//_get_user_id();
 		
 		$postedData['title'] = $this->input->post('title');
+		$postedData['type'] = 'Essay';
 		$postedData['start_at'] = convertDate($this->input->post('start_at'), 'mysql');
 		$postedData['due_at'] = convertDate($this->input->post('due_at'), 'mysql');
 		$postedData['level'] = $this->input->post('level');
@@ -115,15 +118,16 @@ class QuizController extends CI_Controller {
         $dtQuiz = $this->Commons_mdl->getData('tbl_quiz', ['id' => $quizID], null)->row_array();
         // $this->_checkSQL($dtQuiz);
 		$data['dtQuiz'] = $dtQuiz;
+		$data['title'] = $this->title;
 		$data['page_title'] = 'Akses Quiz';
 		$data['isi'] = 'quiz/v_token';
 		// $data['jsFile'] = 'quiz/js_quiz';	
 		$this->load->view('templates/adminlte/v_general', $data, FALSE);
 	}
 
-	function _checkQuizToken($token)
+	function _checkQuizToken($qid, $token)
 	{
-		$dtQuiz = $this->Commons_mdl->getData('tbl_quiz', ['token' => $token], null);
+		$dtQuiz = $this->Commons_mdl->getData('tbl_quiz', ['id' => $qid,'token' => $token], null);
 		if($dtQuiz->num_rows() < 1){
 			$msg = '<div class="alert alert-warning" role="alert">Token salah.</div>';
 	        $this->session->set_flashdata('flashMsg', $msg);
@@ -147,9 +151,10 @@ class QuizController extends CI_Controller {
 
 		$userID = _getUserInfo('ses_UserID');
 		$token = $this->input->post('token');
+		$qid = $this->input->post('qid');
 		$btnSubmit = $this->input->post('btn_submit');
 
-		$this->_checkQuizToken($token);
+		$this->_checkQuizToken($qid, $token);
 		$this->_checkQuizDone($token, $userID);
 
         $dtQID = $this->Commons_mdl->getData('tbl_quiz', ['token' => $token], null)->row_array();
@@ -172,6 +177,7 @@ class QuizController extends CI_Controller {
 
         $data['token'] = $token;
         $data['dtSoal'] = $dtSoal;
+        $data['title'] = $this->title;
 		$data['page_title'] = 'Soal Essay';
 		$data['isi'] = 'quiz/v_do';
 		// $data['jsFile'] = 'quiz/js_index';	
@@ -206,6 +212,7 @@ class QuizController extends CI_Controller {
 
         $data['token'] = $token;
         $data['dtSoal'] = $dtSoal;
+        $data['title'] = $this->title;
 		$data['page_title'] = 'Soal Essay';
 		$data['isi'] = 'quiz/v_do';
 		// $data['jsFile'] = 'quiz/js_index';	
@@ -236,7 +243,9 @@ class QuizController extends CI_Controller {
         // $this->_checkSQL($dtSoal->result());
 
 		$data['dtQuery'] = $dtQuery;
+		$data['notes'] = $dtQuery->row()->notes;
         // $data['token'] = $token;
+        $data['title'] = $this->title;
 		$data['page_title'] = 'Quiz view';
 		$data['isi'] = 'quiz/v_view';
 		// $data['jsFile'] = 'quiz/js_index';	
@@ -312,6 +321,7 @@ class QuizController extends CI_Controller {
         $data['token'] = $quizPostID;
         $data['done_by'] = $dtQuery->row()->done_by;
         $data['dtQuery'] = $dtQuery;
+        $data['title'] = $this->title;
 		$data['page_title'] = 'Quiz Check';
 		$data['isi'] = 'quiz/v_check';
 		// $data['jsFile'] = 'quiz/js_index';	
@@ -348,28 +358,5 @@ class QuizController extends CI_Controller {
         $msg = '<div class="alert alert-success" role="alert">Berhasil, Quiz sudah di review.</div>';
         $this->session->set_flashdata('flashMsg', $msg);
         redirect('arabic/dashboard', 'refresh');
-	}
-
-	function test()
-	{
-		echo "string";
-	}
-
-	function _testPost()
-    {
-        //--- TESTING:
-        $p = $this->input->post();
-        echo "<pre>";
-        print_r ($p);
-        echo "</pre>";
-        die();        
-    }
-
-	function _checkSQL($variable)
-	{
-		echo "<pre>";
-		print_r ($variable);
-		echo "</pre>";
-		die();
 	}
 }

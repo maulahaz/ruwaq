@@ -44,8 +44,8 @@
 						<td class="text-left"><?= $row->title ?></td>
 						<td><?= $row->level ?></td>
 						<td class="text-left"><?= $row->questions ?></td>
-						<td><?= $row->start_at ?></td>					  
-						<td><?= $row->due_at ?></td>					  
+						<td><?= convertDate($row->start_at, 'mydate') ?></td>					  
+						<td><?= convertDate($row->due_at, 'mydate') ?></td>					  
 						<td><?= $row->token ?></td>					  
 						<td>
 							<!-- Single button -->

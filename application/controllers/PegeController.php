@@ -6,6 +6,7 @@ class PegeController extends CI_Controller {
 	{
 		parent ::__construct();
 		$this->load->model('Commons_mdl');
+		$this->title = 'Ruwaq Sibawiyah - Ruwais Arabic Club';
 	}
 
 	function _checkUserPrevilege()
@@ -27,6 +28,7 @@ class PegeController extends CI_Controller {
 
 		$data['dtSoal'] = $dtSoal;
 		$data['flash'] = $this->session->flashdata('flashMsg');
+		$data['title'] = $this->title;
 		$data['page_title'] = 'List Soal Pilihan Ganda';
 		$data['isi'] = 'pege/v_index';
 		$data['jsFile'] = 'pege/js_index';	
@@ -39,6 +41,7 @@ class PegeController extends CI_Controller {
 		$this->_checkUserPrevilege();
 
 		$data['flash'] = $this->session->flashdata('flashMsg');
+		$data['title'] = $this->title;
 		$data['page_title'] = 'Tambah Soal PG';
 		$data['isi'] = 'pege/v_form_pege'; 
 		// $data['isi'] = 'pege/v_form_question'; 
@@ -148,6 +151,7 @@ class PegeController extends CI_Controller {
 		$data['dtEdit'] = $dtEdit->row_array();
 		$data['dtEditAnswer'] = $dtEditAnswer;
 		$data['flash'] = $this->session->flashdata('flashMsg');
+		$data['title'] = $this->title;
 		$data['page_title'] = 'Edit Soal PG';
 		$data['isi'] = 'pege/v_form_pege';
 		$data['jsFile'] = 'pege/js_index';	
@@ -212,14 +216,7 @@ class PegeController extends CI_Controller {
 
 	function delete($id)
 	{
+		redirect('webpages/undercon');
 		echo "PegeController : Delete ".$id;
-	}
-
-	function _checkSQL($variable)
-	{
-		echo "<pre>";
-		print_r ($variable);
-		echo "</pre>";
-		die();
 	}
 }

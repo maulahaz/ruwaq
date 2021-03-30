@@ -27,8 +27,8 @@
   <body class="hold-transition login-page">
     <div class="login-box">
       <div class="login-logo">
-        <a href="<?= base_url(); ?>"><b><?= $title;?></a>
-        <h3><?= $page_title;?></h3>
+        <a href="<?= base_url(); ?>"><b><?= $page_title;?></a>
+        <h3><?= $sub_title;?></h3>
       </div><!-- /.login-logo -->
       <div class="login-box-body">
         <div class="msgBox"><?php $this->view('notification'); ?></div>  
@@ -37,7 +37,7 @@
 
           <div class="form-group has-feedback">
             <input type="text" name="username" class="form-control" placeholder="Username">
-            <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
+            <span class="glyphicon glyphicon-user form-control-feedback"></span>
           </div>
 
           <div class="form-group has-feedback">
@@ -65,8 +65,8 @@
           <a href="#" class="btn btn-block btn-social btn-google btn-flat"><i class="fa fa-google-plus"></i> Sign in using Google+</a>
         </div>/.social-auth-links -->
 
-        <a href="#">Forgot password</a><br>
-        <a href="register.html" class="text-center">Register</a>
+        <a href="<?=base_url('auth/forgot') ?>">Forgot password</a><br>
+        <a href="<?=base_url('auth/register') ?>" class="text-center">Register</a>
 
       </div><!-- /.login-box-body -->
     </div><!-- /.login-box -->

@@ -9,59 +9,13 @@ class AuthController extends CI_Controller
 	{
 		parent ::__construct();
 		$this->load->model('Commons_mdl');
-		$this->title = 'Ruwaq Sibawiyah';
+		$this->title = 'Ruwaq Sibawiyah - Ruwais Arabic Club';
 	}
 
 	function index()
 	{
 		_isLoggedin();
 		$this->_afterSignin();
-	}
-	
-	function signup()
-	{
-		redirect('pages/undercon');
-		$submit = $this->input->post('submit', TRUE);
-		// $email = $this->input->post('email', TRUE);
-		// $username = $this->input->post('username', TRUE);
-
-		// if($submit == "Cancel"){ redirect(base_url()); }
-
-		if($submit == "Signup"){
-			// echo "string";die();
-			//--Validasi:
-			$this->form_validation->set_rules('fullname', 'Fullname', 'required|min_length[5]');
-			$this->form_validation->set_rules('email', 'Email', 'required|valid_email|is_unique[tbl_member.Email]');
-			$this->form_validation->set_rules('username', 'User Name / ID', 'required|is_unique[tbl_member.Usr_id]');
-			$this->form_validation->set_rules('userpass', 'Password', 'required|trim|min_length[5]');
-			$this->form_validation->set_rules('userpass2', 'Repeat Password', 'matches[userpass]');
-
-			$this->form_validation->set_message('valid_email', 'Wrong {field} format.');
-			$this->form_validation->set_message('is_unique', 'Same {field} id has been registered. Please use another.');
-
-			if($this->form_validation->run() == TRUE){
-				$postedData['Usr_id'] = $this->input->post('username', TRUE);
-				$postedData['Name'] = $this->input->post('fullname', TRUE);
-				$postedData['Usr_pwd'] = sha1($this->input->post('userpass', TRUE));
-				$postedData['Email'] = $this->input->post('email', TRUE);
-				$postedData['Role_id'] = "member";
-				$postedData['isActive'] = 1;
-				$postedData['Status_data'] = 'active';
-				// $postedData['Updated_dtm'] = time();
-
-				$this->load->model('Members_mdl');
-				$this->Members_mdl->_insert($postedData);
-				$flash_msg = "Registration completed, Please Login";
-				$value= '<div class="alert alert-success text-center" style="margin-top:10px; font-weight: bold; color: red;" role="alert">'.$flash_msg.'</div>';
-				$this->session->set_flashdata('signin', $value);
-				redirect('auths/signin');
-			}
-		}
-
-		$data['title'] = "Resister - Taxibook";
-		$data['page_title'] = "Account Resister";
-		$data['flash'] = $this->session->flashdata('signin');
-		$this->load->view('templates/v_signup', $data, FALSE);
 	}
 
 	function signin()
@@ -71,7 +25,8 @@ class AuthController extends CI_Controller
 		}
 
 		$data['title'] = $this->title;
-		$data['page_title'] = 'Belajar Bahasa Arab';
+		$data['page_title'] = 'Ruwaq Sibawiyah';
+		$data['sub_title'] = 'Ruwais Arabic Club';
 		$data['flash'] = $this->session->flashdata('flashMsg');
 		$this->load->view('templates/adminlte/v_signin', $data, FALSE);
 	}
@@ -87,7 +42,7 @@ class AuthController extends CI_Controller
 			$username = $this->input->post('username', TRUE);
 			$userpass = $this->input->post('userpass', TRUE);
 
-			$whereCondition = "(Usr_id = '$username' OR Email = '$username') AND Usr_pwd = sha1('$userpass')";
+			$whereCondition = "(Usr_id = '$username' OR Email = '$username') AND Usr_pwd = sha1('$userpass') AND Usr_status = 1";
 			// $cekLogin = $this->Commons_mdl->getData('tbl_account', ['Usr_id' => $username, 'Usr_pwd' => sha1($userpass)], null)->row();
 			$cekLogin = $this->Commons_mdl->getData('tbl_account', $whereCondition, null)->row();
 			// checkSQL($cekLogin);
@@ -96,8 +51,11 @@ class AuthController extends CI_Controller
 			if(!empty($cekLogin)){
 				$userID = $cekLogin->Usr_id;
 				$userName = $cekLogin->Name;
-				$roleID = $cekLogin->Role_id;			
-				
+				$userLevel = $cekLogin->Usr_level;
+				$userPost = $cekLogin->Position;
+				$userPhoto = $cekLogin->Photo;			
+				// $roleID = $cekLogin->Role_id;
+
 				// Create session
 				$this->session->set_userdata('ses_UserID', $userID);
 				$this->session->set_userdata('ses_Name', $userName);
@@ -106,7 +64,8 @@ class AuthController extends CI_Controller
 				$this->session->set_userdata('ses_Photo', $userPhoto);
 				$this->session->set_userdata('isLoggedin', TRUE);
 
-				if($roleID == "admin"){
+				// if($roleID == "admin"){
+				if($userLevel == 5){
 					$this->session->set_userdata('isAdmin', TRUE);
 				}
 
@@ -114,7 +73,7 @@ class AuthController extends CI_Controller
 
 			} else{
 
-				$msg = '<div class="alert alert-warning" role="alert">Wrong Username / Password</div>';
+				$msg = '<div class="alert alert-warning" role="alert">Wrong Username / Password / Not activated</div>';
         		$this->session->set_flashdata('flashMsg', $msg);
 				// redirect(base_url('auth/login'),'refresh');
 				redirect($_SERVER['HTTP_REFERER']);
@@ -125,16 +84,71 @@ class AuthController extends CI_Controller
 			$this->session->set_flashdata('flashMsg', $msg);
 			redirect($_SERVER['HTTP_REFERER']);
 		}
-
 	}
 
 	function _afterSignin()
 	{
 		redirect('arabic');
 	}
+	
+	function signup()
+	{
+		// redirect('pages/undercon');
+
+		if(_getUserInfo('isLoggedin')){
+			redirect('arabic');
+		}
+
+		$data['title'] = $this->title;
+		$data['page_title'] = 'Ruwaq Sibawiyah';
+		$data['sub_title'] = 'Ruwais Arabic Club';
+		$data['flash'] = $this->session->flashdata('flashMsg');
+		$this->load->view('templates/adminlte/v_signup', $data, FALSE);
+	}
+
+	function submit_signup()
+	{
+		// checkPost();
+
+		//--Validasi:
+		$this->form_validation->set_rules('fullname', 'Fullname', 'required|min_length[5]');
+		$this->form_validation->set_rules('email', 'Email', 'required|valid_email|is_unique[tbl_account.Email]');
+		$this->form_validation->set_rules('username', 'User Name / ID', 'required|is_unique[tbl_account.Usr_id]');
+		$this->form_validation->set_rules('userpass', 'Password', 'required|trim|min_length[5]|matches[userpass2]');
+		$this->form_validation->set_rules('userpass2', 'Confirm Password', 'required');
+
+		$this->form_validation->set_message('valid_email', 'Wrong {field} format.');
+		$this->form_validation->set_message('is_unique', 'Same {field} id has been registered. Please use another.');
+
+		if($this->form_validation->run() == TRUE){
+			$postedData['Usr_id'] = $this->input->post('username', TRUE);
+			$postedData['Name'] = $this->input->post('fullname', TRUE);
+			$postedData['Usr_pwd'] = sha1($this->input->post('userpass', TRUE));
+			$postedData['Email'] = $this->input->post('email', TRUE);
+			$postedData['Position'] = "user";
+			$postedData['Usr_level'] = "1";
+			// 0=>Not Active (to be activate by Authorize Usr) | 1=>Active
+			$postedData['Usr_status'] = 0;
+			$postedData['Created_at'] = time();
+
+			$this->Commons_mdl->insert('tbl_account', $postedData);
+			$msg = '<div class="alert alert-success" role="alert">Registration completed, Please Login after account activated by Admin.</div>';
+    		$this->session->set_flashdata('flashMsg', $msg);
+			redirect(base_url('auth/login'),'refresh');
+			// redirect($_SERVER['HTTP_REFERER']);
+		}
+		else{
+
+			$msg= '<div class="alert alert-warning" role="alert"><strong>ERROR !!!,</strong>'.validation_errors().'</div>';
+			$this->session->set_flashdata('flashMsg', $msg);
+			redirect($_SERVER['HTTP_REFERER']);
+		}
+	}
 
 	function forgot()
 	{
+		redirect('webpages/undercon');
+		
 		if(_getUserInfo('isLoggedin')){
 			redirect('pages/dashboard');
 		}
@@ -203,113 +217,6 @@ class AuthController extends CI_Controller
 		$data['title'] = "Forgot Password - ".getProfile('Web_name');
 		$data['headline'] = "Forget password";
 		$data['flashMsg'] = $this->session->flashdata('flashMsg');
-		$this->load->view('templates/v_forgot', $data, FALSE);
-	}
-
-	function forgot_bak()
-	{
-		redirect('pages/undercon');
-		$this->load->model('Users_mdl');
-		$submit = $this->input->post('submit', TRUE);
-
-		if($submit == "Submit"){
-			//--Testing---
-			// $email = $this->input->post('email', TRUE);
-			// $phone = $this->input->post('phone', TRUE);
-			// $birthDate = $this->input->post('birth_date', TRUE);
-			// $birthDate_conv = date("Y-m-d",strtotime($birthDate));
-			// echo $email."-".$phone."-".$birthDate_conv;
-			// echo "<br>";
-			// $checkForgot = $this->Users_mdl->checkForgot($email, $phone, $birthDate_conv);
-			// echo $this->db->last_query();
-			// echo "<br>";
-			// echo "<pre>";
-			// print_r ($checkForgot);
-			// echo "</pre>";
-			// die();
-			//--eof
-
-			// Process the form
-			$this->form_validation->set_rules('email','Email','required|valid_email');
-			$this->form_validation->set_rules('phone','Phone','required');
-			$this->form_validation->set_rules('birth_date','Birth Date','required');
-			//
-			$this->form_validation->set_message('required', '{field} Must be fill.');
-			$this->form_validation->set_message('valid_email', 'Wrong {field} format.');
-			//
-			if($this->form_validation->run() == TRUE){
-				$email = $this->input->post('email', TRUE);
-				$phone = $this->input->post('phone', TRUE);
-				$birthDate = $this->input->post('birth_date', TRUE);
-				$birthDate_conv = date("Y-m-d", strtotime($birthDate));
-
-				//--Method for Preventing form resubmit
-				// $frm_timestamp = $this->input->post('frm_timestamp', TRUE);
-				// $this->session->set_userdata('ses_frm_timestamp', $frm_timestamp);
-				// $ses_frm_timestamp_db = $this->session->all_userdata();
-				// $ses_frm_timestamp_x = $ses_frm_timestamp_db['ses_frm_timestamp'];
-				// if($frm_timestamp == $ses_frm_timestamp_x){
-				// 	echo "not same yaah".'<br>';
-				// 	return;
-				// }
-				
-				//-Validasi data forgot
-				$checkForgot = $this->Users_mdl->checkForgot($email, $phone, $birthDate_conv);
-
-				if($checkForgot){
-					$getUserData = $this->Users_mdl->get_where_custom('Email', $email)->row();
-					$userID = $getUserData->Usr_id;
-					$newPassword = generate_random_string(10);
-					$gotoSignin = base_url('auths/signin');
-					$gotoChangePass = base_url('profile/changepass');
-					//--Test
-					// echo "<pre>";
-					// print_r ($getUserData);
-					// echo "</pre>";
-					// echo $userID."--".$newPassword."--".sha1($newPassword);die();
-					//--eof
-					$postedData['Usr_pwd'] = sha1($newPassword);
-					// $postedData['Email'] = $email;
-					// $postedData['isActive'] = '1';
-					// $postedData['Message_code'] = '';
-					// $postedData['Updated_by'] = $email;
-					// $postedData['Updated_dtm'] = time();
-					$whereArray = array('Email' => $email);
-					$this->Users_mdl->_update_where($whereArray, $postedData);	
-					
-					$outputHTML	= '<html><body>';
-					$outputHTML	.= '<h3 class="form-header">Your Account Resetted Successfully</h3>';
-					$outputHTML	.= '<p>Here is your account data:</p>';
-					$outputHTML	.= 'User ID : <strong>'.$userID.'</strong>';
-					$outputHTML	.= '<br>New Password : <strong>'.$newPassword.'</strong>';
-					$outputHTML	.= '<br><br>Please <strong>Signin</strong> with your new password through this <a href="'.$gotoSignin.'" target="_blank")>link</a>';
-					$outputHTML	.= '<br>Then <strong>Change your new password</strong> through this <a href="'.$gotoChangePass.'" target="_blank")>link</a>';
-					$outputHTML	.= '</body></html>';
-					echo $outputHTML;
-					return;
-
-					// $resettedDataAccount['user_id'] = $userID;
-					// $resettedDataAccount['new_password'] = $newPassword;
-
-					// redirect(base_url('auths/resettedaccount/'.$resettedDataAccount));
-					// $resettedDataAccount['title'] = "Forgot - Taxibook";
-					// $resettedDataAccount['page_title'] = "Forgot Password";
-					// $this->load->view('templates/v_forgot', $resettedDataAccount, FALSE);
-
-				} else{
-
-					$flash_msg = "Wrong Data Verification";
-					$value= '<p style="color: red;">'.$flash_msg.'</p>';
-					$this->session->set_flashdata('verify', $value);
-
-					redirect(base_url('auths/forgot'),'refresh');
-				}
-			}
-		}
-
-		$data['title'] = "Forgot - Taxibook";
-		$data['page_title'] = "Forgot Password";
-		$data['flash'] = $this->session->flashdata('verify');
 		$this->load->view('templates/v_forgot', $data, FALSE);
 	}	
 

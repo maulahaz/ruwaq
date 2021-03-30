@@ -7,16 +7,43 @@ $route['default_controller'] = 'AuthController';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
-/*ROUTE UNTUK Authorization*/
+/*ROUTE Authorization Module*/
 //----------------------------------------------------------------------
 $route['auth/login'] = "AuthController/signin";
 $route['auth/submit_login']['POST'] = "AuthController/submit_login";
 $route['auth/logout'] = "AuthController/signout";
+$route['auth/register'] = "AuthController/signup";
+$route['auth/submit_signup']['POST'] = "AuthController/submit_signup";
+$route['auth/forgot'] = "AuthController/forgot";
+
+/*ROUTE User Module*/
+//----------------------------------------------------------------------
+$route['user'] = "UserController/manage";
+$route['user/manage'] = "UserController/manage";
+$route['user/profile'] = "UserController/profile";
+$route['user/update/(:num)']['POST'] = "UserController/update/$1";
+$route['user/changepass'] = "UserController/changepass";
+$route['user/submit_changepass']['POST'] = "UserController/submit_changepass";
+// $route['user/edit/(:num)']['POST'] = "UserController/edit_user/$1";
+$route['user/edit/(:num)'] = "UserController/edit_user/$1";
+$route['user/delete/(:num)'] = "UserController/delete_user/$1";
+$route['user/activation/(:num)'] = "UserController/activate_user/$1";
+
+/*ROUTE Materi Module*/
+//----------------------------------------------------------------------
+$route['materi'] = "MateriController/index";
+$route['materi/tambah'] = "MateriController/create";
+$route['materi/store']['POST'] = "MateriController/store";
+$route['materi/view/(:any)'] = "MateriController/view/$1";
 
 /*ROUTE UNTUK Arabic Module*/
 //----------------------------------------------------------------------
 $route['arabic'] = "ArabicController/index";
 $route['arabic/dashboard'] = "ArabicController/dashboard";
+$route['arabic/materi'] = "ArabicController/materi";
+$route['arabic/materi/tambah'] = "ArabicController/create";
+$route['arabic/materi/store']['POST'] = "ArabicController/store";
+$route['arabic/materi/view/(:any)'] = "ArabicController/view/$1";
 
 /*ROUTE UNTUK Soal Essay : Bhs Arab*/
 //----------------------------------------------------------------------
@@ -63,3 +90,18 @@ $route['arabic/quiz/view/(:any)'] = "QuizController/view/$1";
 //----------------------------------------------------------------------
 $route['arabic/qpege'] = "QpegeController/index";
 $route['arabic/qpege/tambah'] = "QpegeController/create";
+$route['arabic/qpege/store']['POST'] = 'QpegeController/store';
+$route['arabic/qpege/akses/(:any)'] = "QpegeController/akses/$1";
+$route['arabic/qpege/do']['POST'] = "QpegeController/do";
+$route['arabic/qpege/submit']['POST'] = 'QpegeController/submit';
+$route['arabic/qpege/view/(:any)'] = "QpegeController/view/$1";
+
+/*ROUTE UNTUK Migration*/
+//----------------------------------------------------------------------
+$route['adm_migration'] = "MigrationController/index";
+$route['adm_migration/do_migration']['POST'] = "MigrationController/do_migration";
+$route['adm_migration/submit_sql']['POST'] = "MigrationController/submit_sql";
+
+/*ROUTE UNTUK Trial*/
+//----------------------------------------------------------------------
+// $route['quiz/list'] = "Apis/quiz_list";

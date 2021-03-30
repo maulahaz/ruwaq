@@ -6,12 +6,14 @@ class QuestionController extends CI_Controller {
 	{
 		parent ::__construct();
 		$this->load->model('Commons_mdl');
+		$this->title = 'Ruwaq Sibawiyah - Ruwais Arabic Club';
 	}
 
 	function _checkUserPrevilege()
 	{
 		$privilege = array("Administrator", "Teacher");
 		$position = _getUserInfo('ses_Post');
+		// echo $position;die();
 		if (!in_array($position, $privilege)) {
 			redirect('webpages/not_allowed');
 		};
@@ -26,6 +28,7 @@ class QuestionController extends CI_Controller {
 		$dtSoal = $this->Commons_mdl->getData('tbl_question', ['type' => 'Essay'], null);
 
 		$data['dtSoal'] = $dtSoal;
+		$data['title'] = $this->title;
 		$data['page_title'] = 'List Soal';
 		$data['isi'] = 'soal/v_index';
 		$data['jsFile'] = 'soal/js_index';	
@@ -37,6 +40,7 @@ class QuestionController extends CI_Controller {
 		// _isAdmin();
 		$this->_checkUserPrevilege();
 
+		$data['title'] = $this->title;
 		$data['page_title'] = 'Tambah Soal';
 		$data['isi'] = 'soal/v_form_question'; 
 		$data['jsFile'] = 'soal/js_index';	
@@ -64,7 +68,7 @@ class QuestionController extends CI_Controller {
         $this->Commons_mdl->insert('tbl_question', $postedData);
         $msg = '<div class="alert alert-success" role="alert">Success, New data created.</div>';
         $this->session->set_flashdata('flashMsg', $msg);
-        redirect('arabic/dashboard', 'refresh');
+        redirect('arabic/pege', 'refresh');
 	}
 
 	function edit($id)
@@ -76,6 +80,7 @@ class QuestionController extends CI_Controller {
 		// $this->_checkSQL($dtEdit->row_array());
 
 		$data['dtEdit'] = $dtEdit->row_array();
+		$data['title'] = $this->title;
 		$data['page_title'] = 'Edit Question';
 		$data['isi'] = 'soal/v_form_question';
 		$data['jsFile'] = 'soal/js_index';	
@@ -84,30 +89,14 @@ class QuestionController extends CI_Controller {
 
 	function update($id)
 	{
+		redirect('webpages/undercon');
 		echo "QuestionController : Update ".$id;
 	}
 
 	function delete($id)
 	{
+		redirect('webpages/undercon');
 		echo "QuestionController : Delete ".$id;
-	}
-
-	function _testPost()
-    {
-        //--- TESTING:
-        $p = $this->input->post();
-        echo "<pre>";
-        print_r ($p);
-        echo "</pre>";
-        die();        
-    }
-
-    function _checkSQL($variable)
-	{
-		echo "<pre>";
-		print_r ($variable);
-		echo "</pre>";
-		die();
 	}
 	
 }

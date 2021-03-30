@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <META HTTP-EQUIV="Content-Type"  CONTENT="text/html; CHARSET=iso-8859-6">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title><?= $page_title ?></title>
+  <title><?= $title ?></title>
   <!-- Tell the browser to be responsive to screen width -->
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
   <!-- Bootstrap 3.3.7 -->
@@ -17,10 +17,18 @@
   <link rel="stylesheet" href="<?= base_url(); ?>t_adminlte/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
 
   <!-- DataTables -->
-  <link rel="stylesheet" href="<?= base_url(); ?>t_adminlte/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">  
+  <link rel="stylesheet" href="<?= base_url(); ?>t_adminlte/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+
+
   <!-- Gyrocode Datatable Checkboxes-->
     <link href="<?= base_url(); ?>/assets/gyrocode-checkboxes/dataTables.checkboxes.css" rel="stylesheet">
 
+  <!-- Fancybox -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" type="text/css" media="screen" />
+
+  <!-- TimeCircles -->
+  <link href="<?= base_url(); ?>/assets/TimeCircles/TimeCircles-v1.5.3.min.css" rel="stylesheet" >
+  
   <!-- Theme style -->
   <link rel="stylesheet" href="<?= base_url(); ?>t_adminlte/dist/css/AdminLTE.min.css">
   <!-- AdminLTE Skins. Choose a skin from the css/skins
@@ -39,10 +47,12 @@
 
   <!-- Google Font -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+
 </head>
 
 <?php  
   $usrPhoto = $this->session->userdata('ses_Photo');
+  $userID = _getUserInfo('ses_UserID');
 ?>
 <body class="hold-transition skin-blue sidebar-mini">
 <!-- Site wrapper -->
@@ -52,9 +62,9 @@
     <!-- Logo -->
     <a href="<?= base_url(); ?>" class="logo" target="_blank">
       <!-- mini logo for sidebar mini 50x50 pixels -->
-      <span class="logo-mini"><b>RK</b></span>
+      <span class="logo-mini"><b>Rq</b></span>
       <!-- logo for regular state and mobile devices -->
-      <span class="logo-lg"><b>Ruwaiskita</b></span>
+      <span class="logo-lg"><b>Ruwaq</b></span>
     </a>
     <!-- Header Navbar: style can be found in header.less -->
     <nav class="navbar navbar-static-top">
@@ -95,7 +105,7 @@
               <!-- Menu Footer-->
               <li class="user-footer">
                 <div class="pull-left">
-                  <!-- <a href="#" class="btn btn-default btn-flat">Profile</a> -->
+                  <a href="<?= base_url('user/profile') ?>" class="btn btn-default btn-flat">Profile</a>
                 </div>
                 <div class="pull-right">
                   <a href="<?= base_url('auth/logout') ?>" class="btn btn-default btn-flat">Sign out</a>
@@ -141,22 +151,55 @@
       <!-- /.search form -->
       <!-- sidebar menu: : style can be found in sidebar.less -->
       <ul class="sidebar-menu" data-widget="tree">
-        <li class="header">TEACHER</li>
-        
-        <li class="treeview">
-          <li><a href="<?= base_url('arabic/soal') ?>"><i class="fa fa-file"></i> <span> Soal Essay</span></a></li>
-          <li><a href="<?= base_url('arabic/pege') ?>"><i class="fa fa-file"></i> <span> Soal PeGe</span></a></li>
-          <li><a href="<?= base_url('arabic/quiz') ?>"><i class="fa fa-file"></i> <span> Quiz Essay</span></a></li>
-          <li><a href="<?= base_url('arabic/qpege') ?>"><i class="fa fa-file"></i> <span> Quiz PeGe</span></a></li>
-          
-        </li>
+        <li class="header">SELF</li>
+        <li><a href="<?= base_url('arabic/dashboard') ?>"><i class="fa fa-dashboard"></i> <span> Dashboard</span></a></li>
+        <li><a href="<?= base_url('user/profile') ?>"><i class="fa fa-child"></i> <span> Profile</span></a></li>
       </ul>
 
       <ul class="sidebar-menu" data-widget="tree">
-        <li class="header">STUDENT</li>
-        <li><a href="<?= base_url('arabic/dashboard') ?>"><i class="fa fa-file"></i> <span> Dashboard</span></a></li>
+        <li class="header">TEACHER</li>
+
+        <?php if($userID == 'admin' || _getUserInfo('ses_Post') == 'Teacher'): ?>
+
+        <li class="treeview">
+          <a href="#">
+            <i class="fa fa-bank"></i> <span>Bank Soal</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu">
+            <li><a href="<?= base_url('arabic/pege') ?>"><i class="fa fa-circle-o"></i> Pe-Ge</a></li>
+            <li><a href="<?= base_url('arabic/soal') ?>"><i class="fa fa-circle-o"></i> Essay</a></li>
+          </ul>
+        </li>
+
+        <li class="treeview">
+          <a href="#">
+            <i class="fa fa-hourglass-end"></i> <span>Quiz</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu">
+            <li><a href="<?= base_url('arabic/qpege') ?>"><i class="fa fa-circle-o"></i> Pe-Ge</a></li>
+            <li><a href="<?= base_url('arabic/quiz') ?>"><i class="fa fa-circle-o"></i> Essay</a></li>
+          </ul>
+        </li>
+
+        <?php endif; ?>
+
+        <li><a href="<?= base_url('materi') ?>"><i class="fa fa-book"></i> <span>Materi</span></a></li>
+
+      </ul>
+
+      <?php if($userID == 'admin'): ?>
+      <ul class="sidebar-menu" data-widget="tree">
+        <li class="header">ADMINISTRATOR</li>
+        <li><a href="<?= base_url('user') ?>"><i class="fa fa-users"></i> <span> Users</span></a></li>
         
       </ul>
+      <?php endif; ?>
     </section>
     <!-- /.sidebar -->
   </aside>
@@ -188,11 +231,18 @@
 <!-- DataTables -->
 <script src="<?= base_url(); ?>t_adminlte/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
 <script src="<?= base_url(); ?>t_adminlte/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+ 
 <!-- Gyrocode Datatable Checkboxes-->
-    <script src="<?= base_url(); ?>/assets/gyrocode-checkboxes/dataTables.checkboxes.min.js"></script>
+<script src="<?= base_url(); ?>/assets/gyrocode-checkboxes/dataTables.checkboxes.min.js"></script>
+
+<!-- Fancybox -->
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
     
 <!-- bootstrap datepicker -->
 <script src="<?= base_url(); ?>t_adminlte/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+
+<!-- TimeCircles -->
+<script src="<?= base_url(); ?>/assets/TimeCircles/TimeCircles-v1.5.3.min.js"></script>
 
 <!-- SlimScroll -->
 <script src="<?= base_url(); ?>t_adminlte/bower_components/jquery-slimscroll/jquery.slimscroll.min.js"></script>
@@ -206,18 +256,19 @@
 <?php if(isset($jsFile)){ $this->load->view($jsFile);} ?>
 
 <script>
+
   $(document).ready(function () {
-    //------------------------------------------
+
     //-------- Date picker
-    //------------------------------------------
     $('.myDatepicker').datepicker({
       autoclose: true,
       format: 'mm/dd/yyyy'
     });
 
-    //------------------------------------------
+    //-------- Fancy box
+    $(".fancybox").fancybox();
+
     //-------- Mulit select checkbox
-    //------------------------------------------
     $('#select_all').on('click',function(){
           if(this.checked){
               $('.checkbox').each(function(){
@@ -252,9 +303,7 @@
         }
     };
 
-    //------------------------------------------
     //-------- Multi upload photo
-    //------------------------------------------
     $(document).on('click', 'button#addFile', function(event){
         event.preventDefault();
         $("div#submit").css("display", "block");

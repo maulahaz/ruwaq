@@ -6,6 +6,7 @@ class QpegeController extends CI_Controller {
 	{
 		parent ::__construct();
 		$this->load->model('Commons_mdl');
+		$this->title = 'Ruwaq Sibawiyah - Ruwais Arabic Club';
 	}
 
 	function _checkUserPrevilege()
@@ -28,6 +29,7 @@ class QpegeController extends CI_Controller {
 		$dtQuiz = $this->Commons_mdl->getData('tbl_quiz', ['type <>' => 'Essay'], null);
 
 		$data['dtQuiz'] = $dtQuiz;
+		$data['title'] = $this->title;
 		$data['page_title'] = 'Quiz List';
 		$data['isi'] = 'qpege/v_index';
 		$data['jsFile'] = 'qpege/js_qpege';	
@@ -42,7 +44,7 @@ class QpegeController extends CI_Controller {
 		$dtQuestions = $this->Commons_mdl->getData('tbl_question', ['type <>' => 'Essay', 'is_active' => 1], 'id DESC');
 
 		$data['dtQuestions'] = $dtQuestions;
-
+		$data['title'] = $this->title;
 		$data['page_title'] = 'Buat Quiz';
 		$data['isi'] = 'qpege/v_form_qpege';
 		$data['jsFile'] = 'qpege/js_qpege';	
@@ -60,7 +62,7 @@ class QpegeController extends CI_Controller {
 
 		$data['dtEdit'] = $dtEdit->row_array();
 		$data['dtQuestions'] = $dtQuestions;
-
+		$data['title'] = $this->title;
 		$data['page_title'] = 'Edit Quiz';
 		$data['isi'] = 'qpege/v_form_qpege';
 		$data['jsFile'] = 'qpege/js_qpege';	
@@ -69,8 +71,8 @@ class QpegeController extends CI_Controller {
 
 	function destroy($id)
 	{
-		// _isAdmin();
-		$this->_checkUserPrevilege();
+		_isAdmin();
+		// $this->_checkUserPrevilege();
 
 		$dtQuery = $this->Commons_mdl->getData('tbl_quiz', ['id' => $id], null);
 		if($dtQuery->num_rows() > 0){
@@ -90,6 +92,7 @@ class QpegeController extends CI_Controller {
 		$userID = _getUserInfo('ses_UserID');//'user003';//_get_user_id();
 		
 		$postedData['title'] = $this->input->post('title');
+		$postedData['type'] = 'Pege';
 		$postedData['start_at'] = convertDate($this->input->post('start_at'), 'mysql');
 		$postedData['due_at'] = convertDate($this->input->post('due_at'), 'mysql');
 		$postedData['level'] = $this->input->post('level');
@@ -113,17 +116,19 @@ class QpegeController extends CI_Controller {
 		_isLoggedin();
 
         $dtQuiz = $this->Commons_mdl->getData('tbl_quiz', ['id' => $quizID], null)->row_array();
-        // $this->_checkSQL($dtQuiz);
+        // checkSQL($dtQuiz);
 		$data['dtQuiz'] = $dtQuiz;
+		$data['title'] = $this->title;
 		$data['page_title'] = 'Akses Quiz';
 		$data['isi'] = 'qpege/v_token';
 		// $data['jsFile'] = 'qpege/js_qpege';	
 		$this->load->view('templates/adminlte/v_general', $data, FALSE);
 	}
 
-	function _checkQuizToken($token)
+	function _checkQuizToken($qid, $token)
 	{
-		$dtQuiz = $this->Commons_mdl->getData('tbl_quiz', ['token' => $token], null);
+		$dtQuiz = $this->Commons_mdl->getData('tbl_quiz', ['id' => $qid,'token' => $token], null);
+		// checkSQL($dtQuiz->row());
 		if($dtQuiz->num_rows() < 1){
 			$msg = '<div class="alert alert-warning" role="alert">Token salah.</div>';
 	        $this->session->set_flashdata('flashMsg', $msg);
@@ -147,9 +152,10 @@ class QpegeController extends CI_Controller {
 
 		$userID = _getUserInfo('ses_UserID');
 		$token = $this->input->post('token');
+		$qid = $this->input->post('qid');
 		$btnSubmit = $this->input->post('btn_submit');
 
-		$this->_checkQuizToken($token);
+		$this->_checkQuizToken($qid, $token);
 		$this->_checkQuizDone($token, $userID);
 
         $dtQID = $this->Commons_mdl->getData('tbl_quiz', ['token' => $token], null)->row_array();
@@ -162,53 +168,25 @@ class QpegeController extends CI_Controller {
         ';
 
         $dtSoal = $this->Commons_mdl->customQuery($sql);
-        // echo $this->Commons_mdl->lastQuery();die();
-        // $this->_checkSQL($dtSoal->result());
 
-        if($btnSubmit == "Cancel"){ redirect(base_url()); }
-        if($btnSubmit == 'Submit'){
-        	// $this->_testPost();
-        }
 
-        $data['token'] = $token;
-        $data['dtSoal'] = $dtSoal;
-		$data['page_title'] = 'Soal Essay';
-		$data['isi'] = 'qpege/v_do';
-		// $data['jsFile'] = 'qpege/js_index';	
-		$this->load->view('templates/adminlte/v_general', $data, FALSE);
-	}
-
-	function doXXXX($token)
-	{
-		_isLoggedin();
-
-		$userID = _getUserInfo('ses_UserID');
-		// $token = $this->input->post('token');
-		$btnSubmit = $this->input->post('btn_submit');
-
-        $dtQID = $this->Commons_mdl->getData('tbl_quiz', ['token' => $token], null)->row_array();
-
-		$sql = '
+        $sqlAnswers = '
             SELECT * 
-            FROM tbl_question 
-            WHERE id IN ('.$dtQID['questions'].')
+            FROM tbl_answer 
+            WHERE question_id IN ('.$dtQID['questions'].')
             ORDER BY RAND()
         ';
-
-        $dtSoal = $this->Commons_mdl->customQuery($sql);
-        echo $this->Commons_mdl->lastQuery();die();
-        // $this->_checkSQL($dtSoal->result());
-
-        if($btnSubmit == "Cancel"){ redirect(base_url()); }
-        if($btnSubmit == 'Submit'){
-        	// $this->_testPost();
-        }
+        $dtAnswers = $this->Commons_mdl->customQuery($sqlAnswers);
+        // checkSQL($dtAnswers->result_array());
 
         $data['token'] = $token;
+        $data['timer'] = $dtQID['timer'];
         $data['dtSoal'] = $dtSoal;
-		$data['page_title'] = 'Soal Essay';
+        $data['dtAnswers'] = $dtAnswers;
+        $data['title'] = $this->title;
+		$data['page_title'] = 'Soal Pilihan Ganda (PG)';
 		$data['isi'] = 'qpege/v_do';
-		// $data['jsFile'] = 'qpege/js_index';	
+		$data['jsFile'] = 'qpege/js_do';	
 		$this->load->view('templates/adminlte/v_general', $data, FALSE);
 	}
 
@@ -225,6 +203,7 @@ class QpegeController extends CI_Controller {
 		';
 
         $dtQuery = $this->Commons_mdl->customQuery($sql);
+        // checkSQL($dtQuery->row());
 
         if($dtQuery->num_rows() < 1){
 			$msg = '<div class="alert alert-warning" role="alert">Quiz ID tidak dikenal.</div>';
@@ -236,7 +215,9 @@ class QpegeController extends CI_Controller {
         // $this->_checkSQL($dtSoal->result());
 
 		$data['dtQuery'] = $dtQuery;
+		$data['notes'] = $dtQuery->row()->notes;
         // $data['token'] = $token;
+        $data['title'] = $this->title;
 		$data['page_title'] = 'Quiz view';
 		$data['isi'] = 'qpege/v_view';
 		// $data['jsFile'] = 'qpege/js_index';	
@@ -248,37 +229,85 @@ class QpegeController extends CI_Controller {
 		redirect('webpages/undercon');
 	}
 
-	// function submit($token)
 	function submit()
 	{
 		_isLoggedin();
-		// $this->_testPost();
-
+		// checkPost();
+		
 		$userID = _getUserInfo('ses_UserID');
-		$qid = $this->input->post('qid');
-        $answered = $this->input->post('answer_qid');
+		$questions = $this->input->post('qid');
+
+		//--Check Submit Timer:
+		$quizTime = $this->input->post('timer', true);
+		$startTimer = $this->session->flashdata('startTimer');
+		$submitTimer = time();
+		$actDuration = $submitTimer - $startTimer;
+		// echo ($quizTime > $actDuration) ? $startTimer.'-Rejected-'.$submitTimer : $startTimer.'-Accept-'.$submitTimer; 
+		// die();
+
+		// $answered = $this->input->post('answer_qid');
+		$totCorrect = 0;
+        $totQuestions = count($questions);
+        $correctAnswer = array(); //Jawaban yg bener
+        $correctAnsweredQID = array(); // ID yg Jawabannya bener
+        $answeredQID = array();
+        $yourAnswers = array();
+
+        foreach ($questions as $key => $qid) {
+            if($this->input->post('answer_qid_'.$qid) != null){
+                $yourAnswers[] = $this->input->post('answer_qid_'.$qid); // Jawaban peserta
+                $answeredQID[] = $qid; // No.Soal yg di jawab
+            }else{
+                $yourAnswers[] = 0; // Klo ga di jawab dr peserta, brati 0
+            }
+
+            if($this->input->post('answer_qid_'.$qid) == $this->_getCorrectOption($qid)){
+                $totCorrect ++;
+                $correctAnsweredQID[] = $qid; // Jawaban yg bener as per qid
+            }
+
+            $correctAnswer[] = $this->_getCorrectOption($qid);               
+        }
+        // checkSQL($yourAnswers);
+        // checkArray([$yourAnswers, $answeredQID, $correctAnsweredQID, $correctAnswer]);
 		
 		// $postedData['token'] = $token;
 		$postedData['token'] = $this->input->post('token');
         $postedData['created_by'] = $userID;
         $postedData['created_at'] = date('Y-m-d H:i:s');
         $postedData['attempt'] = 1;
-        $postedData['mark'] = 0;
-        // $this->_checkSQL($postedData);
+        if($quizTime > $actDuration){
+        	$postedData['mark'] = 0;
+        	$postedData['notes'] = 'Submitted over time limit';
+        } else{
+	        $postedData['mark'] = round($totCorrect / $totQuestions * 100, 2);
+        }
+        $postedData['checked_by'] = 'Auto';
+        $postedData['checked_at'] = date('Y-m-d H:i:s');
+        // checkSQL($postedData);
 
         $this->Commons_mdl->insert('tbl_quiz_post', $postedData);
         $insertedID = $this->Commons_mdl->getInsertID();
 
-        for ($i=0; $i < count($qid); $i++) { 
+        for ($i=0; $i < count($questions); $i++) { 
+        	$pts = ($yourAnswers[$i] == $correctAnswer[$i]) ? 1 : 0;
             $dtDetail['quiz_post_id'] = $insertedID;
-            $dtDetail['question_id'] = $qid[$i];
-            $dtDetail['answered'] = $answered[$i];
+            $dtDetail['question_id'] = $questions[$i];
+            $dtDetail['answered'] = $yourAnswers[$i];
+            $dtDetail['points'] = $pts;
+            $dtDetail['correct_answer'] = $correctAnswer[$i];
             $this->Commons_mdl->insert('tbl_quiz_post_detail', $dtDetail);
         }
         // echo "Sukses";
-        $msg = '<div class="alert alert-success" role="alert">Selamat, Anda sudah mengerjakan Quiz. Silahkan tunggu untuk mendapatkan hasil evaluasinya.</div>';
+        $msg = '<div class="alert alert-success" role="alert">Selamat, Anda sudah mengerjakan Quiz.</div>';
         $this->session->set_flashdata('flashMsg', $msg);
         redirect('arabic/dashboard', 'refresh');
+	}
+
+	function _getCorrectOption($questionID)
+	{
+		$correctAnswer = $this->Commons_mdl->getData('tbl_answer',['question_id'=>$questionID,'is_correct' => 1])->row()->opt_text;
+        return $correctAnswer;
 	}
 
 	function check($quizPostID)
@@ -312,6 +341,7 @@ class QpegeController extends CI_Controller {
         $data['token'] = $quizPostID;
         $data['done_by'] = $dtQuery->row()->done_by;
         $data['dtQuery'] = $dtQuery;
+        $data['title'] = $this->title;
 		$data['page_title'] = 'Quiz Check';
 		$data['isi'] = 'qpege/v_check';
 		// $data['jsFile'] = 'qpege/js_index';	
@@ -350,26 +380,4 @@ class QpegeController extends CI_Controller {
         redirect('arabic/dashboard', 'refresh');
 	}
 
-	function test()
-	{
-		echo "string";
-	}
-
-	function _testPost()
-    {
-        //--- TESTING:
-        $p = $this->input->post();
-        echo "<pre>";
-        print_r ($p);
-        echo "</pre>";
-        die();        
-    }
-
-	function _checkSQL($variable)
-	{
-		echo "<pre>";
-		print_r ($variable);
-		echo "</pre>";
-		die();
-	}
 }

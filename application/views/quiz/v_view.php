@@ -70,6 +70,11 @@
           </div>
         </div>
       <?php endforeach; ?>
+      
+      <div class="notes">
+        <h4  style="color: red;">Notes:</h4>
+        <?= isset($notes) ? $notes : '-' ?>
+      </div>
 
       <hr>
       <div class="form-group pull-right">

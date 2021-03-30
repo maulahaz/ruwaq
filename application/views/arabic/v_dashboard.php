@@ -9,7 +9,10 @@
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
     <section class="content">
-    	<div class="msgBox"><?php if(isset($flash)) { echo $flash; } ?></div>
+    	<div class="msgBox">
+    		<?php //if(isset($flash)) { echo $flash; } ?>
+    		<?php $this->view('notification'); ?>
+    	</div>
     	<div class="row">
     		
     		<div class="col-md-6">
@@ -18,7 +21,7 @@
 		            <div class="box-header with-border">
 		                <h3 class="box-title"><?= $boxTitle1; ?></h3>
 		                <?php if(_getUserInfo('ses_Post') == 'Teacher') : ?>
-		                <a href="<?= base_url('artikel/tambah') ?>" target="_blank"> <button type="button" class="btn btn-inline btn-primary pull-right" title="Add New Data">+ Artikel</button></a>
+		                <a href="<?= base_url('materi/tambah') ?>" target="_blank"> <button type="button" class="btn btn-inline btn-primary pull-right" title="Add New Data">+ Materi</button></a>
 			            <?php endif; ?>
 		                
 		            </div>
@@ -37,10 +40,10 @@
 					  	<?php foreach ($dtMateri->result() as $row): ?>
 							<tr>
 								<td><?= $sn++ ?></td>
-								<td><?=$row->Title ?></td>
+								<td class="text-left"><?=$row->Title ?></td>
 								<td><?=get_nice_date($row->Date_posted, 'mydate') ?></td>				  
 								<td>
-									<a href="<?= base_url('artikel/view/'.$row->URL) ?>" class="btn btn-primary btn-sm fa fa-eye" data-toggle="tooltip" data-placement="top" title="View"></a>
+									<a href="<?= base_url('arabic/materi/view/'.$row->URL) ?>" class="btn btn-primary btn-sm fa fa-eye" data-toggle="tooltip" data-placement="top" title="View"></a>
 								</td>                                     
 							</tr>
 							<?php endforeach; ?>					
@@ -80,7 +83,12 @@
 								<td><?= convertDate($row->due_at, 'mydate') ?></td>					  
 								<td>
 									<!-- <a href="<?//base_url('arabic/quiz/do/'.$row->token) ?>" class="btn btn-primary btn-sm fa fa-play" data-toggle="tooltip" data-placement="top" title="Execute"></a> -->
-									<a href="<?= base_url('arabic/quiz/akses/'.$row->id) ?>" class="btn btn-primary btn-sm fa fa-star" data-toggle="tooltip" data-placement="top" title="Akses"></a>
+									<?php if($row->type == 'Essay'): ?>
+									<?php $link = base_url('arabic/quiz/akses/'.$row->id) ?>
+									<?php elseif($row->type == 'Pege'): ?>
+									<?php $link = base_url('arabic/qpege/akses/'.$row->id) ?>
+									<?php endif; ?>
+									<a href="<?= $link; ?>" class="btn btn-primary btn-sm fa fa-rocket" data-toggle="tooltip" data-placement="top" title="Akses"></a>
 								</td>                                     
 							</tr>
 							<?php endforeach; ?>					
@@ -107,6 +115,7 @@
 		            <th>Done by</th>
 		            <th>Done at</th>
 		            <th>Quiz Title</th>
+		            <th>Type</th>
 		            <th>Attempt</th>
 		            <th>Result</th>
 		            <th class="text-center">Action</th>                                     
@@ -116,19 +125,25 @@
 			  	<?php $sn = 1; ?> 
 			  	<?php if ($dtResult->num_rows() > 0): ?>
 			  		<?php foreach ($dtResult->result() as $row): ?>
+		  			<?php if($row->type == 'Essay'): ?>
+	  				<?php $quizType = 'quiz'; ?>
+		  			<?php elseif($row->type == 'Pege'): ?>
+	  				<?php $quizType = 'qpege'; ?>
+	  				<?php endif; ?>
 					<tr>
 						<td><?= $sn++ ?></td>
 						<td class="text-left"><?= $row->created_by ?></td>
 						<td class="text-left"><?= convertDate($row->created_at,'mydate'); ?></td>
 						<td class="text-left"><?= $row->title ?></td>
+						<td><?= $row->type ?></td>
 						<td><?= $row->attempt ?></td>
 						<td><?= $row->mark ?></td>
 						<td>
 							<!-- <a href="<?//base_url('arabic/quiz/redo/'.$row->quiz_post_id) ?>" class="btn btn-primary btn-sm fa fa-refresh" data-toggle="tooltip" data-placement="top" title="Repeat"></a> -->
-							<a href="<?= base_url('arabic/quiz/view/'.$row->quiz_post_id) ?>" class="btn btn-primary btn-sm fa fa-eye" data-toggle="tooltip" data-placement="top" title="View"></a>
+							<a href="<?= base_url('arabic/'.$quizType.'/view/'.$row->quiz_post_id) ?>" class="btn btn-primary btn-sm fa fa-eye" data-toggle="tooltip" data-placement="top" title="View"></a>
 						
-							<?php if(_getUserInfo('ses_Post') == 'Teacher') : ?>
-							<a href="<?= base_url('arabic/quiz/check/'.$row->quiz_post_id) ?>" class="btn btn-primary btn-sm fa fa-check-square-o" data-toggle="tooltip" data-placement="top" title="Correction"></a>
+							<?php if(_getUserInfo('ses_Post') == 'Teacher' && ($row->type == 'Essay')) : ?>
+							<a href="<?= base_url('arabic/'.$quizType.'/check/'.$row->quiz_post_id) ?>" class="btn btn-primary btn-sm fa fa-check-square-o" data-toggle="tooltip" data-placement="top" title="Correction"></a>
 							<?php endif; ?>
 						</td>                                     
 					</tr>

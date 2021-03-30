@@ -1,6 +1,10 @@
 <?php 
   $formLocation = base_url().'arabic/quiz/do';
-  $arrLevel = [1 => 'Pemula', 2 => 'Menengah', 3 => 'Atas'];
+
+  $validFrom = $dtQuiz['start_at'];
+  $validUntil = $dtQuiz['due_at'];
+  $currentDate = date('Y-m-d H:i:s');
+  $isValid = (($currentDate >= $validFrom && $currentDate <= $validUntil) ? true : false);
 ?>
 <style>
   th,td{
@@ -22,7 +26,11 @@
       <div class="box-header with-border">
         <h3 class="box-title"><?= $page_title; ?></h3>
 
-        <?php // require_once('notification.php'); ?>
+        <!-- Check Limit Pengerjaan Quiz -->
+        <?php if(!$isValid): ?>
+        <p style='color: red;'>Error : Waktu pengerjaan Quiz di luar range.</p>
+        <?php endif; ?>
+
         <?php $this->view('notification'); ?>
 
       </div>
@@ -71,8 +79,9 @@
             </div>        
             <br>
             <div class="form-group pull-left">
-                <button type="submit" class="btn btn-primary" name="btn_submit" value="Submit">Submit</button>
-                <a href="<?=base_url('arabic') ?>" class="btn btn-default">Cancel</a>
+              <input type="hidden" name="qid" value="<?=$dtQuiz['id'] ?>">
+              <button type="submit" class="btn btn-primary" name="btn_submit" value="Submit" <?= ($isValid) ? '' : 'disabled' ?>>Submit</button>
+              <a href="<?=base_url('arabic') ?>" class="btn btn-default">Cancel</a>
                 
             </div>
 

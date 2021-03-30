@@ -556,6 +556,16 @@ function checkPost()
     die();        
 }
 
+function checkArray($array)
+{
+	foreach ($array as $key => $value) {
+		echo "<pre>";
+		print_r ($value);
+		echo "</pre>";
+	}
+	die();
+}
+
 function checkSQL($variable)
 {
 	$ci =& get_instance();
